@@ -1,28 +1,40 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import Header from '../../components/Header';
 import { Input } from '../../components/Input';
 import { Container } from './styles';
-import AsyncStorageLib from '@react-native-async-storage/async-storage'; import { State } from 'react-native-gesture-handler';
-;
+import AsyncStorageLib from '@react-native-async-storage/async-storage';
+import { useForm, Controller } from 'react-hook-form';
+import navigations from '../../navigations';
 
-const index = () => {
-    const handleSubmit = async (value: any) => {
+type TypeFormData = {
+    name: string;
+    symbol: string;
+    price: number;
+    quantity: number;
+}
+
+const index = ({ navigation }: any) => {
+    const { control, handleSubmit } = useForm<TypeFormData>({
+        defaultValues: {
+            name: '',
+            symbol: '',
+            price: 0,
+            quantity: 0
+        }
+    })
+
+    const Submit = async (value: any) => {
         try {
             const jsonvalue = JSON.stringify(value)
             await AsyncStorageLib.setItem('@Data', jsonvalue)
-            return console.log('Deu certo')
+            Alert.alert('Cadastro Realizado com Sucesso');
+            navigation.navigate('Home')
         } catch (error) {
 
         }
     }
-    const [state, setState] = useState<any>({
-        name: '',
-        symbol: '',
-        price: 0,
-        quantity: 0
 
-    })
     return (
         <Container>
             <Header />
@@ -32,25 +44,67 @@ const index = () => {
 
                     <View style={{}}>
                         <Text>Nome</Text>
-                        <Input onChangeText={item => setState({ ...state, name: item })} />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <Input
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                />
+                            )}
+                            name="name"
+                        />
+
                     </View>
                     <View style={{}}>
                         <Text>Símbolo</Text>
-                        <Input onChangeText={item => setState({ ...state, symbol: item })} />
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <Input
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                />
+                            )}
+                            name="symbol"
+                        />
                     </View>
 
                     <View style={{ flexDirection: 'row' }}>
                         <View style={{ marginRight: 5, width: '50%' }}>
                             <Text>Preço</Text>
-                            <Input keyboardType='numeric' onChangeText={item => setState({ ...state, price: item })} />
+                            <Controller
+
+                                control={control}
+                                render={({ field: { onChange, onBlur } }) => (
+                                    <Input
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        keyboardType='numeric'
+                                    />
+                                )}
+                                name="price"
+                            />
                         </View>
                         <View style={{ width: '49%' }}>
                             <Text>Quantidade</Text>
-                            <Input keyboardType='numeric' onChangeText={item => setState({ ...state, quantity: item })} />
+                            <Controller
+                                control={control}
+                                render={({ field: { onChange, onBlur } }) => (
+                                    <Input
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        keyboardType='numeric'
+                                    />
+                                )}
+                                name="quantity"
+                            />
                         </View>
                     </View>
                     <View style={{ alignItems: 'center', marginTop: 100 }}>
-                        <TouchableOpacity onPress={() => { handleSubmit(state) }} style={{ backgroundColor: '#0ABD6A', marginTop: 10, width: 100, alignItems: 'center', borderRadius: 10 }}><Text style={{ fontSize: 18 }}>Salvar</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={handleSubmit(data => Submit(data))} style={{ backgroundColor: '#0ABD6A', marginTop: 10, width: 100, alignItems: 'center', borderRadius: 10 }}><Text style={{ fontSize: 18 }}>Salvar</Text></TouchableOpacity>
                     </View>
                 </View>
             </View>
